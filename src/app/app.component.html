@@ -1,3 +1,15 @@
-<h1>
-  {{title}}
-</h1>
+<br/>
+<div class="container ">
+  <div class="form pull-right">
+    <div class="form-group">
+      <input type="text" class="form-control" autofocus [(ngModel)]="userData.user" placeholder="Jan Nowak">
+    </div>
+    <div class="form-group">
+      <input type="text" class="form-control" [(ngModel)]="userData.program" placeholder="Next + Verto">
+    </div>
+    <button class="btn btn-success " (click)="print()"><span class="glyphicon glyphicon-print"></span>  Drukuj</button>
+  </div>
+
+  <h3 class="text-center "><i>Zestawienie czasu pracy</i></h3>
+<month-view  [program]="userData.program" (onMonthChange)="monthChange($event)"></month-view>
+</div>
