@@ -1,0 +1,23 @@
+<month-selector (onMonthSelected)="showMonthDays($event)"></month-selector>
+<table class="table table-striped table-hover table-condensed">
+    <tr>
+        <th>Dzień miesiąca</th>
+        <th>Czas pracy</th>
+        <th>Program</th>
+        <th>Czas nieobecności</th>
+        <th>Przyczyna nieobecności</th>
+    </tr>
+    <tr *ngFor="let day of days" [class.disabled]="day.weekend||day.holiday">
+        <td>{{day.lp}} - {{day.dayName}}</td>
+        <td>{{day.workHours | hideLessEqZero}}</td>
+        <td>{{day.nonWorkHours==8||day.weekend?'':program}}</td>
+        <td><input class="form-control input-sm" style="width:60px;height: 22px"
+                   *ngIf="day.nonWorkHours > 0 && !day.holiday"
+                   [(ngModel)]="day.nonWorkHours"/>
+            <span *ngIf="day.holiday">{{day.nonWorkHours}}</span>
+        </td>
+        <td>
+            <holiday-selector *ngIf="!day.weekend" [day]="day"></holiday-selector>
+        </td>
+    </tr>
+</table>

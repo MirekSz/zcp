@@ -1,0 +1,17 @@
+table {
+    font-size: 10px;
+}
+
+input.form-control {
+    width: auto;
+}
+
+table tr {
+    line-height: 25px;
+    min-height: 25px;
+    height: 10px;
+}
+
+tr.disabled {
+    color: lightgrey;
+}
