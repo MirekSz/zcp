@@ -2,7 +2,8 @@
 
 let express = require('express');
 let path = require("path");
-
+var pdfmake = require('pdfmake');
+var fs = require('fs');
 let bodyParser = require('body-parser');
 let cors = require('cors');
 var Holidays = require('date-holidays')
@@ -33,6 +34,7 @@ class User {
         this.sex = sex;
     }
 }
+
 let users = [new User(1, 'Jacek', 'Doe', '43', 'Mężczyzna'),
     new User(2, 'Marzanna', 'Uss', '54', 'Kobieta'),
     new User(3, 'Julia', 'Dolej', '22', 'Kobieta')];
@@ -46,6 +48,7 @@ function generateID() {
     });
     return (maxID + 1);
 }
+
 app.use('/zcp', express.static('dist'))
 // app.get('/zcp', function(req, res) {
 //   res.sendFile(path.join(__dirname+'/dist/index.html'));
@@ -86,6 +89,56 @@ app.get('/zcp/holidays', function (request, response) {
     var holidays = hd.getHolidays(new Date());
     holidays.splice(6, 1);
     response.send(holidays);
+});
+
+app.post('/report', function (request, response) {
+    let reportData = request.body;
+    let body = [
+        ['Dzień miesiąca', 'Czas pracy', 'Program', 'Czas nieobecności', 'Przyczyna nieobecności'],
+    ];
+    var days = reportData.days;
+    for (let day of days) {
+        body.push([day.lp, day.workHours || '', day.holiday || day.weekend ? '' : (day.nonWorkHours == 8 ? '' : reportData.userData.program), day.holiday || day.weekend ? '' : day.nonWorkHours || '', day.holiday || day.weekend ? '' : day.nonWorkReason || '']);
+    }
+    let docDefinition = {
+        content: [{
+            text: 'Zestawienie czasu pracy pracownika za ' + reportData.month + " - " + reportData.userData.user,
+            style: 'header'
+        }, {
+            layout: 'lightHorizontalLines',
+            style: 'table',
+            table: {
+                headerRows: 1,
+                widths: ['*', 'auto', 100, '*', '*'],
+
+                body: body
+            }
+        }],
+        styles: {
+            header: {
+                fontSize: 10,
+                alignment: 'center',
+                margin: [0, 0, 0, 20]
+            },
+            table: {
+                alignment: 'center',
+                fontSize: 8,
+            }
+        }
+    };
+    var fontDescriptors = {
+        Roboto: {
+            normal: path.join(__dirname, '..', './zcp/Roboto-Regular.ttf'),
+        }
+    };
+
+
+    var printer = new pdfmake(fontDescriptors);
+    var pdfDoc = printer.createPdfKitDocument(docDefinition);
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
+    pdfDoc.pipe(response);
+    pdfDoc.end();
 });
 
 app.get('/users', function (request, response) {
@@ -136,6 +189,7 @@ app.get('/leak', function handleStuckRequest(request, response) {
     response.send({res: 'ok'});
 });
 var li = [];
+
 function memeoryLeak() {
     i++;
     li = [];
